@@ -1,0 +1,314 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Resource Management Module",
+    "description": "Followings are the API that the Resource Management Module provides."
+  },
+  "paths": {
+    "/resource_pluigins": {
+      "get": {
+        "tags": [
+          "Resource Management"
+        ],
+        "summary": "Get the list of resource management plugins installed on server.",
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Plugin"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload": {
+      "get": {
+        "tags": [
+          "Resource Management"
+        ],
+        "summary": "A simple webpage to debug this API.",
+        "responses": {
+          "200": {
+            "description": "A simple webpage to debug this API.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<!doctype html>\n<title>Upload new File</title>\n<h1>Upload new File</h1>\n<form action=\"\" method=post enctype=multipart/form-data>\n    <input type=text name=plugin_name />\n    <input type=file name=\"file[]\" multiple=\"multiple\"/>\n    <input type=submit value=Upload />\n</form>\n"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Resource Management"
+        ],
+        "summary": "Upload a file and save as a resource on the server. Supports BMP, JPG and PNG currently.",
+        "requestBody": {
+          "description": "Information of data being fed to the server.",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "plugin_name": {
+                    "type": "string",
+                    "description": "The ID of the resource managment plugin handling this upload."
+                  },
+                  "file[]": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Uploading completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": "{\n  \"OK\": [\n    dummy.png\n  ],\n  \"FAILED\": [\n    broken.jpg\n  ],\n  \"NOT-ALLOWED\": [\n    malicious.exe\n  ]\n}\n"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plugin not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "No plugin with given plugin_name was found."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_resource_metadata/{resourceID}": {
+      "get": {
+        "tags": [
+          "Resource Management"
+        ],
+        "summary": "Get metadata of a resource from server with ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "resourceID",
+            "description": "The ID of the resource of which metadata user wish to retrieve with.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ID": {
+                      "type": "integer"
+                    },
+                    "CREATED-AT": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "CREATED-BY": {
+                      "type": "string"
+                    },
+                    "PLUGIN-ID": {
+                      "type": "string",
+                      "example": "edu.hm.hsieh_mylocalphotoloader_1.0"
+                    },
+                    "MIME": {
+                      "type": "string",
+                      "example": "image/png"
+                    },
+                    "EXTRA-INFO": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource with given ID not found.",
+            "content": {
+              "text/plain": {
+                "example": "Not found."
+              }
+            }
+          },
+          "410": {
+            "description": "Resource/Plugin missing.",
+            "content": {
+              "text/plain": {
+                "example": "Plugin handling this resource has been removed.\nResource can no longer be found.\n"
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error.",
+            "content": {
+              "text/plain": {
+                "example": "Unknown error."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_resource_list": {
+      "get": {
+        "tags": [
+          "Resource Management"
+        ],
+        "summary": "Get metadata of all resources.",
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "ID": {
+                        "type": "integer"
+                      },
+                      "CREATED-AT": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "CREATED-BY": {
+                        "type": "string"
+                      },
+                      "PLUGIN-ID": {
+                        "type": "string",
+                        "example": "edu.hm.hsieh_mylocalphotoloader_1.0"
+                      },
+                      "MIME": {
+                        "type": "string",
+                        "example": "image/png"
+                      },
+                      "EXTRA-INFO": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_resource/{resourceID}": {
+      "get": {
+        "tags": [
+          "Resource Management"
+        ],
+        "summary": "Get enconded resource from server with ID. Currently support image/*.",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "resourceID",
+            "description": "ID of the resource user retrieving.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource with given ID not found.",
+            "content": {
+              "text/plain": {
+                "example": "Not found."
+              }
+            }
+          },
+          "410": {
+            "description": "Resource/Plugin missing.",
+            "content": {
+              "text/plain": {
+                "example": "Plugin handling this resource has been removed.\nResource can no longer be found.\n"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "text/plain": {
+                "example": "Unknown error.\nUnknown format error.\n"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Plugin": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price_description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,556 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Solution Management Module",
+    "description": "Followings are the API that the Solution Management Module provides."
+  },
+  "paths": {
+    "/solution_plugins": {
+      "get": {
+        "tags": [
+          "Solution"
+        ],
+        "summary": "Get the list of solutions installed on server.",
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Plugin"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/create_model": {
+      "post": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "Create a brand new machine learning model with specified solution.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "solutionID",
+            "description": "The solution that the model creating with.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Basic details of the new model.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nickname": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ID of the new model.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": 7
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Solution ID was not specified.\nNickname is already used, use another.\n"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Such solution not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Solution with specified ID is not found."
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Plugin in charge failed to create the new model.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Failed to create a new model."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/models": {
+      "get": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "Get the list of models' metadata created on server.",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Model"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feed_train_data": {
+      "post": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "Feed training data to a model.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "modelID",
+            "description": "ID or nickname of the model to feed data toward.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Trainging data. Dictionary of resourceID:tag of the resource.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Bad training data.\nBad training data format.  \nModel with state [STATE_TRAINING|STATE_MODEL_USABLE] is no longer allowed to give training data.\n"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Molution not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "No model with given modelID was found."
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Plugin in charge failed to feed training data to the model.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "model can not be found from plugin database"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/train_model": {
+      "get": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "Train the specified model.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "modelID",
+            "description": "ID or nickname of the model to feed data toward.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Training process started successfully. Server will keep sending training logs instantaneously in the response body.",
+            "headers": {
+              "X-Content-Type-Options": {
+                "description": "Always be set with nosniff for supporting of showing streaming responses on browsers.",
+                "schema": {
+                  "type": "string",
+                  "example": "nosniff"
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Bad training parameter format.\nCan't train model with state:[STATE_MODEL_CREATED|STATE_TRAINING|STATE_MODEL_USABLE].\n"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Such solution not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "No model with given modelID was found."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "Train the specified model.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "modelID",
+            "description": "ID or nickname of the model to feed data toward.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Custom parameters for the training.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Training process started successfully. Server will keep sending training logs instantaneously in the response body.",
+            "headers": {
+              "X-Content-Type-Options": {
+                "description": "Always be set with nosniff for supporting of showing streaming responses on browsers.",
+                "schema": {
+                  "type": "string",
+                  "example": "nosniff"
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Bad training parameter format. \nCan't train model with state:[STATE_MODEL_CREATED|STATE_TRAINING|STATE_MODEL_USABLE].\n"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Model not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "No model with given modelID was found."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predict": {
+      "get": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "A simple webpage to debug this API.",
+        "responses": {
+          "200": {
+            "description": "A simple webpage to debug this API.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<!doctype html>\n  <title>Upload new File to predit</title>\n  <h1>Upload new File</h1>\n  <form action=\"\" method=post enctype=multipart/form-data>\n      <input type=text name=\"modelName\"/>\n      <input type=file name=\"image[]\" multiple=\"multiple\"/>\n      <input type=submit value=Upload />\n</form>\n"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "Upload a photo and make prediction with a trained model. Supports BMP, JPG and PNG currently.",
+        "requestBody": {
+          "description": "Information of data being feeded to be prediction.",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "modelID": {
+                    "type": "string",
+                    "description": "ID or nickname of the madel."
+                  },
+                  "image[]": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully triggered prediction oepration.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": "{\n  \"ISOK\": true,\n  \"RESULT\": {\n    \"175\": {\n      \"CLASS\": \"1\",\n      \"SCORE\": 0.95\n    }\n  }\n}\n{\n  \"ISOK\": false\n}\n    \n    \n"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "text/plain": {
+                "example": "Can't predict with a untrained model."
+              }
+            }
+          },
+          "404": {
+            "description": "Model not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "No model with given modelID was found."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predict_w_list": {
+      "post": {
+        "tags": [
+          "Model"
+        ],
+        "summary": "Upload a list of resource ID and make prediction with resources listed.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "modelID",
+            "description": "ID or nickname of the model to feed data toward.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Information of data being feeded to be prediction.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64",
+                  "example": 175
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully triggered prediction oepration.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": "{\n  \"ISOK\": true,\n  \"RESULT\": {\n    \"175\": {\n      \"CLASS\": \"1\",\n      \"SCORE\": 0.95\n    }\n  }\n}\n{\n  \"ISOK\": false\n}\n"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "text/plain": {
+                "example": "Can't predict with a untrained model."
+              }
+            }
+          },
+          "404": {
+            "description": "Model not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "No model with given modelID was found."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Plugin": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price_description": {
+            "type": "string"
+          }
+        }
+      },
+      "Model": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "create_by": {
+            "type": "string"
+          },
+          "plugin_id": {
+            "type": "string",
+            "description": "The solution ID that the model created with."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "STATE_MODEL_CREATED",
+              "STATE_DATA_FEEDING",
+              "STATE_TRAINING",
+              "STATE_MODEL_USABLE"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

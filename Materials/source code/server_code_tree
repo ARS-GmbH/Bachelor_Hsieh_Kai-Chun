@@ -1,0 +1,19 @@
+.
+├── main.py
+├── requirement.txt
+├── resource_loader.py
+├── server_api.py
+├── solution_manager.py
+├── utils.py
+├── resource_loader_plugins
+│   ├── __init__.py
+│   ├── interface.py
+│   └── local_photo_loader.py
+└── solution_plugins
+    ├── __init__.py
+    ├── interface.py
+    ├── azure_image_classifier.py
+    └── local_foam_elimination_detector.py
+
+
+2 directories, 15 files

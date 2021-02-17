@@ -1,0 +1,6 @@
+flask
+opencv-python
+psycopg2-binary
+scipy
+sklearn
+azure-cognitiveservices-vision-customvision
